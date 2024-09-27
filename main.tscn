@@ -1,0 +1,57 @@
+[gd_scene load_steps=5 format=3 uid="uid://cjutvug40fcn5"]
+
+[ext_resource type="Script" path="res://character_body_2d.gd" id="1_ju24g"]
+[ext_resource type="Texture2D" uid="uid://bvnjauxv7n3ud" path="res://Art/Player.png" id="1_trjdm"]
+[ext_resource type="Texture2D" uid="uid://d1gk2voo01am4" path="res://Art/light-cone.png" id="3_n7gm0"]
+[ext_resource type="Script" path="res://ui_progress_bar.gd" id="4_4tnfn"]
+
+[node name="Main" type="Node2D"]
+
+[node name="Polygon2D" type="Polygon2D" parent="."]
+color = Color(0.14902, 0.168627, 0.266667, 1)
+polygon = PackedVector2Array(0, 0, 481, 0, 481, 270, 0, 270)
+
+[node name="CharacterBody2D" type="CharacterBody2D" parent="."]
+position = Vector2(310, 133)
+motion_mode = 1
+script = ExtResource("1_ju24g")
+speed = 100.0
+metadata/_edit_group_ = true
+
+[node name="Sprite2D" type="Sprite2D" parent="CharacterBody2D"]
+texture = ExtResource("1_trjdm")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="CharacterBody2D"]
+visible = false
+polygon = PackedVector2Array(7, 13, 7, -12, -7, -12, -7, 13)
+
+[node name="Flashlight" type="PointLight2D" parent="CharacterBody2D"]
+show_behind_parent = true
+color = Color(0.752941, 0.796078, 0.862745, 1)
+shadow_enabled = true
+texture = ExtResource("3_n7gm0")
+offset = Vector2(-195, 2)
+
+[node name="Enemy" type="Sprite2D" parent="."]
+position = Vector2(74, 128)
+texture = ExtResource("1_trjdm")
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="ProgressBar" type="ProgressBar" parent="UI"]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -48.0
+offset_top = 5.0
+offset_right = 50.0
+offset_bottom = 10.0
+grow_horizontal = 2
+mouse_filter = 2
+step = 1.0
+value = 100.0
+rounded = true
+show_percentage = false
+script = ExtResource("4_4tnfn")
+
+[connection signal="battery_level_changed" from="CharacterBody2D" to="UI/ProgressBar" method="_on_battery_level_changed"]
