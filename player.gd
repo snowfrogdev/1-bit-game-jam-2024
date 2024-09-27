@@ -3,10 +3,11 @@ extends CharacterBody2D
 @export var speed = 300.0
 
 @onready var flashlight: PointLight2D = $Flashlight
+@onready var boost_ray: RayCast2D = $Flashlight/BoostRay
 
 # Battery properties
-@export var battery_drain_speed = 20.0 # percentage drained per second
-@export var battery_recharge_speed = 50.0 # percentage recharged per second
+@export() var battery_drain_speed = 20.0 # percentage drained per second
+@export() var battery_recharge_speed = 50.0 # percentage recharged per second
 var battery_level = 100.0 # 100% battery
 var max_battery_level = 100.0
 var min_battery_level = 0.0
@@ -18,9 +19,10 @@ func _physics_process(delta: float) -> void:
 	get_input()
 	update_flashlight()
 	update_battery(delta)
+	update_boost_ray(delta)
 	move_and_slide()
 
-func _process(_delta):
+func _process(_delta: float):
 	point_flashlight_towards_mouse()
 	# var mouse_direction = get_global_mouse_position() - global_position
 	# var angle_to_velocity = velocity.angle_to(mouse_direction)
@@ -86,3 +88,17 @@ func point_flashlight_towards_mouse():
 	var direction = (mouse_pos - flashlight.global_position).normalized()
 	var angle = direction.angle() + PI
 	flashlight.rotation = angle
+
+func update_boost_ray(delta: float):
+	if is_boosting and battery_level > min_battery_level:
+		boost_ray.enabled = true
+		check_boost_ray(delta)
+	else:
+		boost_ray.enabled = false
+
+func check_boost_ray(delta: float):
+	if boost_ray.is_colliding():
+		var collider = boost_ray.get_collider()
+		var parent = collider.get_parent()
+		if parent.is_in_group("enemy"):
+			parent.weaken_shield(delta)
