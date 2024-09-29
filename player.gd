@@ -1,25 +1,29 @@
 extends CharacterBody2D
 
-@export var speed = 300.0
+@export var speed := 300.0
 
 @onready var flashlight: PointLight2D = $Flashlight
 @onready var boost_ray: RayCast2D = $Flashlight/BoostRay
 
 # Battery properties
-@export() var battery_drain_speed = 20.0 # percentage drained per second
-@export() var battery_recharge_speed = 50.0 # percentage recharged per second
+@export var battery_drain_speed := 20.0 # percentage drained per second
+@export var battery_recharge_speed := 50.0 # percentage recharged per second
 var battery_level = 100.0 # 100% battery
 var max_battery_level = 100.0
 var min_battery_level = 0.0
 var is_boosting = false
 signal battery_level_changed(battery_level: float)
 
+var bullet_scene := preload("res://bullet.tscn")
+@export var shooting_cooldown := 0.5 # Time between shots
+var time_since_last_shot := 0.0
 
 func _physics_process(delta: float) -> void:
 	get_input()
 	update_flashlight()
 	update_battery(delta)
 	update_boost_ray(delta)
+	update_shooting(delta)
 	move_and_slide()
 
 func _process(_delta: float):
@@ -55,6 +59,9 @@ func get_input():
 		is_boosting = true
 	else:
 		is_boosting = false
+
+	if Input.is_action_pressed("Fire Weapon"):
+		shoot()
 
 	var input_direction = Input.get_vector("Move Left", "Move Right", "Move Up", "Move Down")
 	#look_at(get_global_mouse_position())
@@ -102,3 +109,19 @@ func check_boost_ray(delta: float):
 		var parent = collider.get_parent()
 		if parent.is_in_group("enemy"):
 			parent.weaken_shield(delta)
+
+func shoot():
+	if time_since_last_shot >= shooting_cooldown:
+		var bullet = bullet_scene.instantiate()
+		# Position the bullet at the position of the flashlight's raycast
+		bullet.global_position = flashlight.get_node("BoostRay").get_global_position()
+
+		var angle = flashlight.global_rotation - PI
+		var direction = Vector2(cos(angle), sin(angle))
+		bullet.direction = direction
+		get_parent().add_child(bullet)
+
+		time_since_last_shot = 0.0
+
+func update_shooting(delta: float):
+	time_since_last_shot += delta
