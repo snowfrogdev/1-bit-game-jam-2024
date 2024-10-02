@@ -1,9 +1,18 @@
-extends CharacterBody2D
+class_name Player
 
-@export var speed := 300.0
+extends CharacterBody2D
 
 @onready var flashlight: PointLight2D = $Flashlight
 @onready var boost_ray: RayCast2D = $Flashlight/BoostRay
+
+@export var speed := 300.0
+
+# Health properties
+@export var health_level := 100.0 # 100% health
+@export var max_health_level := 100.0
+@export var min_health_level := 0.0
+signal health_level_changed(health_level: float)
+
 
 # Battery properties
 @export var battery_drain_speed := 20.0 # percentage drained per second
@@ -108,6 +117,7 @@ func check_boost_ray(delta: float):
 		var collider = boost_ray.get_collider()
 		var parent = collider.get_parent()
 		if parent.is_in_group("enemy"):
+			print("Enemy hit by flashlight")
 			parent.weaken_shield(delta)
 
 func shoot():
@@ -125,3 +135,13 @@ func shoot():
 
 func update_shooting(delta: float):
 	time_since_last_shot += delta
+
+func take_damage(damage: int) -> void:
+	health_level -= damage
+	health_level = clamp(health_level, min_health_level, max_health_level)
+	health_level_changed.emit(health_level / max_health_level)
+	if health_level <= min_health_level:
+		die()
+
+func die() -> void:
+	queue_free()

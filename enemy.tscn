@@ -1,0 +1,70 @@
+[gd_scene load_steps=8 format=3 uid="uid://b1nwslrd3i07p"]
+
+[ext_resource type="Script" path="res://enemy.gd" id="1_7j61a"]
+[ext_resource type="Texture2D" uid="uid://bvnjauxv7n3ud" path="res://Art/Player.png" id="2_emw4o"]
+
+[sub_resource type="Gradient" id="Gradient_6asce"]
+offsets = PackedFloat32Array(0, 0.701299, 1)
+colors = PackedColorArray(0.977937, 0.977937, 0.977937, 1, 0, 0, 0, 1, 0, 0, 0, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_we60k"]
+gradient = SubResource("Gradient_6asce")
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0, 0)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ocgc6"]
+radius = 12.0
+height = 32.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_onawy"]
+radius = 336.001
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_3oeyb"]
+radius = 21.0238
+
+[node name="Enemy" type="CharacterBody2D" groups=["enemy"]]
+position = Vector2(125, 60)
+collision_layer = 4
+motion_mode = 1
+script = ExtResource("1_7j61a")
+metadata/_edit_group_ = true
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_emw4o")
+
+[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+polygon = PackedVector2Array(-10, -13, 10, -13, 10, 14, -10, 14)
+
+[node name="DarknessShield" type="Node2D" parent="."]
+
+[node name="PointLight2D" type="PointLight2D" parent="DarknessShield"]
+color = Color(0.752941, 0.796078, 0.862745, 1)
+blend_mode = 1
+texture = SubResource("GradientTexture2D_we60k")
+
+[node name="LightDetectionArea" type="Area2D" parent="."]
+collision_layer = 4
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LightDetectionArea"]
+position = Vector2(-1, 1)
+shape = SubResource("CapsuleShape2D_ocgc6")
+debug_color = Color(0.378007, 0.610686, 0.177413, 0.42)
+
+[node name="PlayerDetectionArea" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PlayerDetectionArea"]
+shape = SubResource("CircleShape2D_onawy")
+
+[node name="AttackArea" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AttackArea"]
+shape = SubResource("CircleShape2D_3oeyb")
+debug_color = Color(0.972549, 0, 0, 0.419608)
+
+[node name="NavigationAgent2D" type="NavigationAgent2D" parent="."]

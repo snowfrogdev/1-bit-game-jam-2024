@@ -1,37 +1,45 @@
-[gd_scene load_steps=9 format=3 uid="uid://cjutvug40fcn5"]
+[gd_scene load_steps=11 format=3 uid="uid://cjutvug40fcn5"]
 
 [ext_resource type="Script" path="res://player.gd" id="1_ju24g"]
 [ext_resource type="Texture2D" uid="uid://bvnjauxv7n3ud" path="res://Art/Player.png" id="1_trjdm"]
 [ext_resource type="Texture2D" uid="uid://d1gk2voo01am4" path="res://Art/light-cone.png" id="3_n7gm0"]
 [ext_resource type="Script" path="res://ui_progress_bar.gd" id="4_4tnfn"]
-[ext_resource type="Script" path="res://enemy.gd" id="5_6c404"]
+[ext_resource type="Script" path="res://ui_health.gd" id="5_dl1nf"]
+[ext_resource type="PackedScene" uid="uid://b1nwslrd3i07p" path="res://enemy.tscn" id="5_ucd7q"]
 
-[sub_resource type="Gradient" id="Gradient_6asce"]
-offsets = PackedFloat32Array(0, 0.701299, 1)
-colors = PackedColorArray(0.977937, 0.977937, 0.977937, 1, 0, 0, 0, 1, 0, 0, 0, 1)
+[sub_resource type="NavigationPolygon" id="NavigationPolygon_u51tl"]
+vertices = PackedVector2Array(280.711, 16.4375, 2823, -840.008, 2823, 1800, 113.906, 280.938, 265.672, 38.3594, 50.4063, 323.07, 55.8594, 315.898, 75.75, 331.039, 260.406, 31.0391, 42.5, 199.008, -103.258, 115.539, 4.53906, 146.25, 22.3516, 124.797, 26.4375, 130.477, -129.008, 104.742, -107.508, 121.109, -1931.02, 1800, -1933.97, -842.977, -168.367, 156.461, 243.922, -34.7031)
+polygons = Array[PackedInt32Array]([PackedInt32Array(0, 1, 2, 3, 4), PackedInt32Array(5, 6, 7), PackedInt32Array(4, 8, 0), PackedInt32Array(9, 4, 3), PackedInt32Array(9, 3, 10), PackedInt32Array(11, 9, 10), PackedInt32Array(12, 13, 11, 10, 14), PackedInt32Array(10, 15, 14), PackedInt32Array(7, 3, 2), PackedInt32Array(7, 2, 16, 5), PackedInt32Array(5, 16, 17, 18), PackedInt32Array(14, 18, 17), PackedInt32Array(1, 0, 19), PackedInt32Array(17, 1, 19), PackedInt32Array(14, 17, 19, 12)])
+outlines = Array[PackedVector2Array]([PackedVector2Array(-1954, -863, 2843, -860, 2843, 1820, -1951, 1820)])
+source_geometry_mode = 1
+agent_radius = 20.0
 
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_we60k"]
-gradient = SubResource("Gradient_6asce")
-fill = 1
-fill_from = Vector2(0.5, 0.5)
-fill_to = Vector2(0, 0)
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kilgr"]
+size = Vector2(235, 25)
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ocgc6"]
-radius = 12.0
-height = 32.0
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_43enm"]
+polygon = PackedVector2Array(-114.691, -11.9604, 115.719, -11.4478, 116.282, 10.7487, -114.924, 10.8419)
+
+[sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_cm7eb"]
+polygon = PackedVector2Array(-115.856, -11.9372, -115.821, 10.2664, -115.01, 10.8507, 115.628, 10.5413, 116.797, 8.91818, 116.99, -11.8896, 108.388, -11.9214)
 
 [node name="Main" type="Node2D"]
 
 [node name="CanvasModulate" type="CanvasModulate" parent="."]
-visible = false
 color = Color(0.14902, 0.168627, 0.266667, 1)
 
 [node name="Polygon2D" type="Polygon2D" parent="."]
+position = Vector2(-1957, -866)
+scale = Vector2(10, 10)
 color = Color(0.752941, 0.796078, 0.862745, 1)
 polygon = PackedVector2Array(0, 0, 481, 0, 481, 270, 0, 270)
 
-[node name="Player" type="CharacterBody2D" parent="."]
-position = Vector2(355, 151)
+[node name="NavigationRegion2D" type="NavigationRegion2D" parent="."]
+navigation_polygon = SubResource("NavigationPolygon_u51tl")
+
+[node name="Player" type="CharacterBody2D" parent="." groups=["player"]]
+position = Vector2(468, 253)
+collision_layer = 2
 motion_mode = 1
 script = ExtResource("1_ju24g")
 speed = 100.0
@@ -56,15 +64,14 @@ height = 16.0
 position = Vector2(-14, 0)
 enabled = false
 target_position = Vector2(-306, 0)
-collision_mask = 4
+collision_mask = 5
 collide_with_areas = true
-collide_with_bodies = false
 
 [node name="Camera2D" type="Camera2D" parent="Player"]
 
 [node name="UI" type="CanvasLayer" parent="."]
 
-[node name="ProgressBar" type="ProgressBar" parent="UI"]
+[node name="Flashlight" type="ProgressBar" parent="UI"]
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
@@ -80,34 +87,54 @@ rounded = true
 show_percentage = false
 script = ExtResource("4_4tnfn")
 
-[node name="Enemy" type="CharacterBody2D" parent="." groups=["enemy"]]
-position = Vector2(125, 60)
-collision_layer = 4
-motion_mode = 1
-script = ExtResource("5_6c404")
+[node name="Health" type="ProgressBar" parent="UI"]
+offset_left = 4.0
+offset_top = 256.0
+offset_right = 86.0
+offset_bottom = 264.0
+show_percentage = false
+script = ExtResource("5_dl1nf")
+
+[node name="Enemy" parent="." instance=ExtResource("5_ucd7q")]
+position = Vector2(12, 13)
+speed = 70.0
+
+[node name="Wall" type="StaticBody2D" parent="." groups=["navigation_polygon_source_geometry_group"]]
+position = Vector2(-40, 214)
+rotation = 0.650825
+scale = Vector2(1, 1)
+collision_mask = 7
 metadata/_edit_group_ = true
 
-[node name="Sprite2D" type="Sprite2D" parent="Enemy"]
-texture = ExtResource("1_trjdm")
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Wall"]
+position = Vector2(0.5, -0.5)
+shape = SubResource("RectangleShape2D_kilgr")
 
-[node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="Enemy"]
-visible = false
-polygon = PackedVector2Array(-10, -13, 10, -13, 10, 14, -10, 14)
+[node name="Polygon2D" type="Polygon2D" parent="Wall"]
+offset = Vector2(-26, 8)
+polygon = PackedVector2Array(-90, -20, 143, -20, 143, 3, -90, 3)
 
-[node name="DarknessShield" type="Node2D" parent="Enemy"]
+[node name="LightOccluder2D" type="LightOccluder2D" parent="Wall"]
+scale = Vector2(1, 1)
+occluder = SubResource("OccluderPolygon2D_43enm")
 
-[node name="PointLight2D" type="PointLight2D" parent="Enemy/DarknessShield"]
-color = Color(0.752941, 0.796078, 0.862745, 1)
-blend_mode = 1
-texture = SubResource("GradientTexture2D_we60k")
+[node name="Wall2" type="StaticBody2D" parent="." groups=["navigation_polygon_source_geometry_group"]]
+position = Vector2(135, 93)
+rotation = -0.623949
+scale = Vector2(1, 1)
+collision_mask = 7
+metadata/_edit_group_ = true
 
-[node name="LightDetectionArea" type="Area2D" parent="Enemy"]
-collision_layer = 4
-collision_mask = 0
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Wall2"]
+position = Vector2(0.5, -0.5)
+shape = SubResource("RectangleShape2D_kilgr")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Enemy/LightDetectionArea"]
-visible = false
-position = Vector2(-1, 1)
-shape = SubResource("CapsuleShape2D_ocgc6")
+[node name="Polygon2D" type="Polygon2D" parent="Wall2"]
+offset = Vector2(-26, 8)
+polygon = PackedVector2Array(-90, -20, 143, -20, 143, 3, -90, 3)
 
-[connection signal="battery_level_changed" from="Player" to="UI/ProgressBar" method="_on_battery_level_changed"]
+[node name="LightOccluder2D" type="LightOccluder2D" parent="Wall2"]
+occluder = SubResource("OccluderPolygon2D_cm7eb")
+
+[connection signal="battery_level_changed" from="Player" to="UI/Flashlight" method="_on_battery_level_changed"]
+[connection signal="health_level_changed" from="Player" to="UI/Health" method="_on_health_level_changed"]
